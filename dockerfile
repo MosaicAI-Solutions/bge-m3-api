@@ -1,14 +1,20 @@
-FROM python:3.12-alpine
+FROM python:3.10-alpine
 
 # Set the working directory in the container
 WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache gcc g++ musl-dev make python3-dev libffi-dev
+RUN pip cache purge
+
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 # Copy requirements file into the container
 COPY requirements.txt /app/requirements.txt
 
 # Install dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r /app/docker-requirements.txt
 
 # Copy the application code into the container
 COPY . /app
