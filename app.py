@@ -2,7 +2,8 @@ from FlagEmbedding import BGEM3FlagModel
 from typing import List, Tuple, Union, cast
 import asyncio
 import os
-from fastapi import FastAPI, Request, Response, HTTPException
+from fastapi import FastAPI, Request, Response, HTTPException, Security, Depends
+from fastapi.security.api_key import APIKeyHeader
 # from starlette.status import HTTP_504_GATEWAY_TIMEOUT
 # from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ import torch
 
 # Configuration
 class Config:
+    API_KEY = os.getenv("API_KEY", "secure-api-key")
     RERANKER_TYPE = os.getenv("RERANKER_TYPE", "bge-m3")  # Default to bge-m3
     DEVICE = os.getenv("DEVICE", "cpu")  # Default to CPU
     BATCH_SIZE = 2
@@ -165,12 +167,22 @@ else:
 embedding_processor = RequestProcessor(embedding_model, Config.MAX_REQUEST, Config.REQUEST_TIMEOUT)
 reranker_processor = RequestProcessor(reranker_model, Config.MAX_REQUEST, Config.REQUEST_TIMEOUT)
 
-@app.post("/embeddings/", response_model=EmbedResponse)
+# Define the API Key Header (default: "X-API-Key")
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
+
+def validate_api_key(api_key: str = Security(api_key_header)):
+    if api_key != Config.API_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid API Key",
+        )
+
+@app.post("/embeddings/", response_model=EmbedResponse, dependencies=[Depends(validate_api_key)])
 async def get_embeddings(request: EmbedRequest):
     embeddings = await embedding_processor.process_request(request, 'embed')
     return EmbedResponse(embeddings=embeddings)
 
-@app.post("/rerank/", response_model=RerankResponse)
+@app.post("/rerank/", response_model=RerankResponse, dependencies=[Depends(validate_api_key)])
 async def rerank(request: RerankRequest):
     scores = await reranker_processor.process_request(request, 'rerank')
     return RerankResponse(scores=scores)

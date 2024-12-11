@@ -11,6 +11,7 @@ services:
       - PORT=8000  # Expose FastAPI on port 8000
       - RERANKER_TYPE=bge-m3  # Model type for reranker
       - DEVICE=cpu  # Device for running the model (e.g., cpu or cuda)
+      - API_KEY=secure-api-key
     restart: always  # Restart container if it crashes
     volumes:
       - .:/app

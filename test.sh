@@ -40,12 +40,14 @@ for i in $(seq 1 $num_requests); do
     curl -X POST "$url_embeddings" \
       -H "accept: application/json" \
       -H "Content-Type: application/json" \
+      -H "X-API-Key: secure-api-key" \
       -d "$json_embeddings" &
   else
     # Send to /rerank/ endpoint
     curl -X POST "$url_rerank" \
       -H "accept: application/json" \
       -H "Content-Type: application/json" \
+      -H "X-API-Key: secure-api-key" \
       -d "$json_rerank" &
   fi
 done
