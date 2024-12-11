@@ -20,11 +20,11 @@ class Config:
     API_KEY = os.getenv("API_KEY", "secure-api-key")
     RERANKER_TYPE = os.getenv("RERANKER_TYPE", "bge-m3")  # Default to bge-m3
     DEVICE = os.getenv("DEVICE", "cpu")  # Default to CPU
-    BATCH_SIZE = 2
+    BATCH_SIZE = 1
     MAX_REQUEST = 5
     MAX_QUERY_LENGTH = 256
-    REQUEST_TIMEOUT = 60
-    GPU_TIMEOUT = 5
+    REQUEST_TIMEOUT = 120
+    GPU_TIMEOUT = 15
     RERANK_WEIGHTS = [0.4, 0.2, 0.4]
     PORT = int(os.getenv("PORT", 8000))
 
