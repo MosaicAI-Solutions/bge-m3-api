@@ -170,6 +170,7 @@ reranker_processor = RequestProcessor(reranker_model, Config.MAX_REQUEST, Config
 # Define the API Key Header (default: "X-API-Key")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
+print("config:", Config.API_KEY)
 def validate_api_key(api_key: str = Security(api_key_header)):
     if api_key != Config.API_KEY:
         raise HTTPException(
