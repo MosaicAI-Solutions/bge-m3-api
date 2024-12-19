@@ -20,8 +20,8 @@ class Config:
     API_KEY = os.getenv("API_KEY", "secure-api-key")
     RERANKER_TYPE = os.getenv("RERANKER_TYPE", "bge-m3")  # Default to bge-m3
     DEVICE = os.getenv("DEVICE", "cpu")  # Default to CPU
-    BATCH_SIZE = 2
-    MAX_REQUEST = 10
+    BATCH_SIZE = 8  # Increased batch size for better CPU utilization
+    MAX_REQUEST = 20  # Allow more requests to be processed in parallel
     MAX_QUERY_LENGTH = 256
     REQUEST_TIMEOUT = 120
     GPU_TIMEOUT = 15
@@ -178,12 +178,12 @@ def validate_api_key(api_key: str = Security(api_key_header)):
             detail="Invalid API Key",
         )
 
-@app.post("/embeddings/", response_model=EmbedResponse, dependencies=[Depends(validate_api_key)])
+@app.post("/embed", response_model=EmbedResponse, dependencies=[Depends(validate_api_key)])
 async def get_embeddings(request: EmbedRequest):
     embeddings = await embedding_processor.process_request(request, 'embed')
     return EmbedResponse(embeddings=embeddings)
 
-@app.post("/rerank/", response_model=RerankResponse, dependencies=[Depends(validate_api_key)])
+@app.post("/rerank", response_model=RerankResponse, dependencies=[Depends(validate_api_key)])
 async def rerank(request: RerankRequest):
     scores = await reranker_processor.process_request(request, 'rerank')
     return RerankResponse(scores=scores)
